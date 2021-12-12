@@ -1,0 +1,102 @@
+{% extends 'basic.html' %}
+
+{% block title %} Blogpost{% endblock title %}
+{% block blog %} active {% endblock %}
+{% block body %}
+{% load humanize %}
+{% load extrass %}
+
+<div class="container">
+    <strong class="d-inline-block mb-2 text-success">The Author Is : {{post.author}}</strong>
+    <h1>{{post.title}}</h1>
+    <div class="mb-1 text-muted">{{post.timeStamp}} ({{post.views}}Views)</div>
+    <p class="mb-auto">{{post.content}}</p>
+</div>
+
+{% if user.is_authenticated %}
+<div class="border rounded my-5 container bg-light">
+    <div class="container mt-5 ">
+        <h1 class="mb-3">Comments {{comments.count}}:</h1>
+
+        <form class="" action="{% url 'Blogcomment' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group mb-2">
+                <div class="form-group">
+                    <div class="form-group">
+                        <textarea class="form-control" name="comment" id="exampleFormControlTextarea1" rows="3"
+                            placeholder="Comment Box."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3" value="submit">Post</button>
+                    <input type="hidden" name='postsrn' value="{{post.srn}}">
+                    <input type="hidden" name='parentsrn' value="">
+                </div>
+            </div>
+        </form>
+        {% for comment in comments %}
+        <div class="row my3 mb-5">
+            <div class="col-md-1"><img src="../../static/img/user.png" class="rounded-circle" style="width:60px;"></div>
+            <div class="col-md-11"><b>{{comment.user}} Says</b> :
+                <div>
+                    <b style="font-size: 13px;">{{comment.timestamp |naturaltime}}</b>
+                </div>
+                <div>{{comment.comment|truncatechars:400}}</div>
+
+
+
+                <div class="reply">
+                    <button class="btn btn-primary btn-sn my-2" type="button" data-toggle="collapse"
+                        data-target="#collapseExample{{comment.sno}}" aria-expanded="false"
+                        aria-controls="collapseExample{{comment.sno}}">
+                        Reply
+                    </button>
+                    <div class="collapse my-3" id="collapseExample{{comment.sno}}">
+                        <div class="card card-body">
+                            <form class="" action="{% url 'Blogcomment' %}" method="post">
+                                {% csrf_token %}
+                                <div class="form-group mb-2">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <textarea class="form-control" name="comment" id="TextArea" rows="3"
+                                                placeholder="Comment Box."></textarea>
+                                        </div>
+                                        <input type="hidden" name='postsrn' value="{{post.srn}}">
+                                        <input type="hidden" name='parentsrn' value="{{comment.sno}}">
+                                        <button type="submit" class="btn btn-primary mt-3" value="submit">Post</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="replies">
+                        {% for reply in reDict|get_val:comment.sno %}
+                        <div class="row my-2">
+                            <div class="col-md-1 w-2 p-2"><img src="../../static/img/user.png" class="rounded-circle"
+                                    style="width:60px;"></div>
+                            <div class="col-md-11"><b>{{reply.user}} Says</b> :
+                                <div>
+                                    <b style="font-size: 13px;">{{reply.timestamp |naturaltime}}</b>
+                                </div>
+                                <div>{{reply.comment|truncatechars:400}}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="container">
+            <h1 class="my-5">Comments :</h1>
+            <b class="container">You Need To LogIn For Drop A Comments </b>
+        </div>
+
+    </div>
+</div>
+
+
+{% endif %}
+
+{% endblock %}
